@@ -5,9 +5,13 @@
     "description": "Evaluate your resume's fit for a job and autofill applications using AI.",
     "permissions": ["activeTab", "scripting"],
     "action": {
-      "default_popup": "popup.html"
+      "default_popup": "popup.html",
+      "default_icon": "jimg.png"
     },
     "host_permissions": ["<all_urls>"],
+    "content_security_policy": {
+  "extension_pages": "script-src 'self'; object-src 'self';"
+},
     "content_scripts": [
       {
         "matches": ["<all_urls>"],

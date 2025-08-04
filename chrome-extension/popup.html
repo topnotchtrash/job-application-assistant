@@ -2,24 +2,357 @@
 <html>
 <head>
   <title>Job Match Assistant</title>
+  <script src="pdf.min.js"></script>
+  <script src="pdf-config.js"></script>
   <style>
-    body { font-family: sans-serif; width: 320px; padding: 10px; }
-    textarea { width: 100%; height: 100px; margin-bottom: 10px; }
-    button { width: 100%; padding: 10px; }
-    #result { margin-top: 10px; font-size: 0.9em; white-space: pre-wrap; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      width: 500px;
+      min-height: 700px;
+      background: linear-gradient(135deg, #000000 0%, #333333 50%, #666666 100%);
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      margin: 10px;
+      padding: 25px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #000000, #333333);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(135deg, #000000, #333333);
+      border-radius: 2px;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px dashed #ddd;
+      border-radius: 12px;
+      background: #fafafa;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    input[type="file"]:hover {
+      border-color: #000000;
+      background: #f5f5f5;
+    }
+
+    input[type="file"]::file-selector-button {
+      background: linear-gradient(135deg, #000000, #333333);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 10px;
+      transition: all 0.3s ease;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      background: #fff;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.5;
+      resize: vertical;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #000000;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    textarea::placeholder {
+      color: #999;
+      font-style: italic;
+    }
+
+    #resumeText {
+      height: 120px;
+      margin-bottom: 15px;
+    }
+
+    #jd {
+      height: 120px;
+      margin-bottom: 15px;
+    }
+
+    #cleanedJD {
+      height: 150px;
+      background: #f5f5f5;
+      border-color: #e0e0e0;
+    }
+
+    .button {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .button:hover::before {
+      left: 100%;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #000000, #333333);
+      color: white;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .secondary-btn {
+      background: linear-gradient(135deg, #333333, #666666);
+      color: white;
+    }
+
+    .secondary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(51, 51, 51, 0.4);
+    }
+
+    .result-section {
+      display: none;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 2px solid #f0f0f0;
+    }
+
+    .result-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    #result {
+      height: 200px;
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .copy-btn {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    }
+
+    .clear-btn {
+      background: linear-gradient(135deg, #f44336, #da190b);
+      color: white;
+    }
+
+    .clear-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #f44336;
+      margin: 10px 0;
+    }
+
+    .success {
+      background: #e8f5e8;
+      color: #2e7d32;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #4caf50;
+      margin: 10px 0;
+    }
+
+    /* Scrollbar styling */
+    textarea::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    textarea::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    textarea::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #000000, #333333);
+      border-radius: 4px;
+    }
+
+    textarea::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #333333, #666666);
+    }
+
+    /* Animation for loading states */
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
   </style>
 </head>
 <body>
-  <h3>Resume</h3>
-  <input type="file" id="resumeFile" accept=".pdf,.txt" />
-  <textarea id="resumeText" placeholder="Or paste your resume here..." style="margin-top:8px;"></textarea>
-  <h3>Job Description</h3>
-  <textarea id="jd" placeholder="Paste or extract job description..."></textarea>
-  <button id="extractJD" style="margin-top: 5px;">Extract JD from Page</button>
+  <div class="container">
+    <div class="header">
+      <h1>Job Match Assistant</h1>
+      <p>AI-powered resume evaluation & job description analysis</p>
+    </div>
 
-  <button id="checkFit">Check Fit</button>
+    <div class="section">
+      <div class="section-title">Resume</div>
+      <div class="file-input-wrapper">
+        <input type="file" id="resumeFile" accept=".pdf,.txt" />
+      </div>
+      <textarea id="resumeText" placeholder="Or paste your resume content here..."></textarea>
+    </div>
 
-  <div id="result"></div>
+    <div class="section">
+      <div class="section-title">Job Description</div>
+      <textarea id="jd" placeholder="Paste or extract job description..."></textarea>
+      <button id="extractJD" class="button secondary-btn">Extract JD from Page</button>
+      <textarea id="cleanedJD" readonly placeholder="Cleaned job description will appear here..."></textarea>
+    </div>
+
+    <button id="checkFit" class="button primary-btn">Evaluate Job Fit</button>
+
+    <div id="resultSection" class="result-section">
+      <h3>Evaluation Results</h3>
+      <textarea id="result" readonly placeholder="Results will appear here..."></textarea>
+      <div class="action-buttons">
+        <button id="copyResult" class="action-btn copy-btn">Copy Results</button>
+        <button id="clearResult" class="action-btn clear-btn">Clear Results</button>
+      </div>
+    </div>
+  </div>
 
   <script src="popup.js"></script>
 </body>
