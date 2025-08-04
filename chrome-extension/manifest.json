@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "Job Application Assistant",
+    "version": "1.0",
+    "description": "Evaluate your resume's fit for a job and autofill applications using AI.",
+    "permissions": ["activeTab", "scripting"],
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "host_permissions": ["<all_urls>"],
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"],
+        "run_at": "document_idle"
+      }
+    ]
+  }
+  

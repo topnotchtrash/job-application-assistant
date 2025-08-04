@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Job Match Assistant</title>
+  <style>
+    body { font-family: sans-serif; width: 320px; padding: 10px; }
+    textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+    button { width: 100%; padding: 10px; }
+    #result { margin-top: 10px; font-size: 0.9em; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h3>Resume</h3>
+  <input type="file" id="resumeFile" accept=".pdf,.txt" />
+  <textarea id="resumeText" placeholder="Or paste your resume here..." style="margin-top:8px;"></textarea>
+  <h3>Job Description</h3>
+  <textarea id="jd" placeholder="Paste or extract job description..."></textarea>
+  <button id="extractJD" style="margin-top: 5px;">Extract JD from Page</button>
+
+  <button id="checkFit">Check Fit</button>
+
+  <div id="result"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
